@@ -1,0 +1,337 @@
+<!DOCTYPE html
+<html lang="en"
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MyKart</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f1f1f1;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      background: #2874f0;
+      color: white;
+      padding: 10px 20px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    header .left-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    .whatsapp {
+      background: #25D366;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+    .cart {
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .product {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .product img {
+      max-width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    .hidden {
+      display: none;
+    }
+    .detail-page {
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+    .main-image {
+      width: 100%;
+      max-width: 300px;
+      border: 2px solid #2874f0;
+      margin-bottom: 10px;
+    }
+    .fixed-buttons {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      padding: 10px;
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+      z-index: 999;
+    }
+    .add-cart-btn, .buy-now-btn {
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .add-cart-btn {
+      background: white;
+      color: #2874f0;
+      border: 2px solid #2874f0;
+    }
+    .buy-now-btn {
+      background: #ffce00;
+      color: black;
+      border: none;
+    }
+    #cart-popup {
+      position: fixed;
+      top: 15%;
+      left: 10%;
+      right: 10%;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #cart-popup ul {
+      list-style: none;
+      padding: 0;
+    }
+    #cart-popup li {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    #cart-popup button.remove {
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #address-form {
+      position: fixed;
+      top: 15%;
+      left: 10%;
+      right: 10%;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #address-form input, #address-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="left-section">
+    <div class="logo" onclick="goHome()">SIRT SHOP</div>
+    <a href="https://wa.me/918009264087" target="_blank" class="whatsapp">WhatsApp Support</a>
+  </div>
+  <div style="color: yellow; font-weight: bold; font-size: 18px;">🎉 Today Special Offer - 80% OFF</div>
+  <div class="cart" onclick="showCart()">🛒 Cart (<span id="cart-count">0</span>)</div>
+</header>
+
+<section class="products" id="product-list"></section>
+
+<section class="detail-page hidden" id="detail-page">
+  <button onclick="goHome()">⬅ Back</button>
+  <h2 id="detail-title"></h2>
+  <img id="main-img" class="main-image" src="" alt="">
+  <p id="detail-price"></p>
+  <p id="detail-desc"></p>
+  <div class="fixed-buttons">
+    <button class="add-cart-btn" onclick="addCurrentToCart()">Add to Cart</button>
+    <button class="buy-now-btn" onclick="buyNow()">Buy Now</button>
+  </div>
+</section>
+
+<!-- Cart Popup -->
+<div id="cart-popup" class="hidden">
+  <h3>Your Cart</h3>
+  <ul id="cart-items"></ul>
+  <div style="display:flex;gap:10px;margin-top:10px">
+    <button onclick="buyNow()" style="flex:1;padding:10px;background:#ffce00;border:none;border-radius:5px;font-weight:bold;cursor:pointer">💰 Buy Now</button>
+    <button onclick="document.getElementById('cart-popup').classList.add('hidden')" style="flex:1;padding:10px;background:#ccc;border:none;border-radius:5px;font-weight:bold;cursor:pointer">❌ Close</button>
+  </div>
+</div>
+
+<!-- Address Form -->
+<div id="address-form" class="hidden">
+  <h3 id="form-title">Enter Delivery Address</h3>
+  <input id="cust-name" placeholder="Full Name" />
+  <input id="cust-phone" placeholder="Mobile Number" />
+  <textarea id="cust-address" placeholder="Full Address"></textarea>
+  <input id="cust-pin" placeholder="PIN Code" />
+  <div style="display:flex;gap:10px;margin-top:10px">
+    <button onclick="submitAddress()" style="flex:1;padding:10px;background:#28a745;border:none;border-radius:5px;color:white;font-weight:bold;cursor:pointer">✅ Confirm</button>
+    <button onclick="document.getElementById('address-form').classList.add('hidden')" style="flex:1;padding:10px;background:#ccc;border:none;border-radius:5px;font-weight:bold;cursor:pointer">❌ Cancel</button>
+  </div>
+
+  <!-- QR Section with UTR Input -->
+  <div id="qr-section" class="hidden" style="margin-top: 20px; text-align: center;">
+    <h4>📱 Payment Ke Baad Aapka Order Confirmed Ho Jayega.</h4>
+    <img src="https://i.supaimg.com/23ed32bb-45ea-484d-9d24-7c010070565c.jpg" alt="QR Code" style="width: 200px; border: 1px solid #ccc; border-radius: 10px;" />
+    <p style="margin-top: 8px; font-weight: bold;">UPI ID: <span style="color: green;">paytmqr1ti8ziki7d@paytm</span></p>
+    <input id="utr-number" placeholder="Enter UTR/Transaction ID" style="width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc;" />
+    
+    <div style="display:flex;gap:10px;margin-top:15px;">
+      <button onclick="confirmPayment()" style="flex:1;padding:10px;background:#28a745;border:none;border-radius:5px;color:white;font-weight:bold;cursor:pointer">✅ Pay Done</button>
+      <button onclick="document.getElementById('address-form').classList.add('hidden')" style="flex:1;padding:10px;background:#ccc;border:none;border-radius:5px;font-weight:bold;cursor:pointer">❌ Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const products = [
+  { id: 1, name: "Brand Sirt 𝗦 Size", price: 129, desc: "Men Regular Fit Solid Curved Collar Casual Shirt", images: ["https://i.supaimg.com/c3f45975-2c5b-4cb8-9343-6436a644a6e9.jpg"] },
+  { id: 2, name: "Brand Sirt 𝗠 Size", price: 153, desc: "Men Regular Fit Checkered Spread Collar Casual Shirt", images: ["https://i.supaimg.com/c5ba425c-d2d9-406f-9ca2-ac266fe1e0ce.jpg"] },
+  { id: 3, name: "Brand Sirt 𝗦 Size", price: 185, desc: "N AND J Men Slim Fit Self Design Spread Collar Casual", images: ["https://i.supaimg.com/12d001b8-00d9-4dcf-92fd-b1efa619f755.jpg"] },
+  { id: 4, name: "Brand Sirt 𝗠 Size", price: 137, desc: "Men Regular Fit Printed Mandarin Collar Casual Shirt", images: ["https://i.supaimg.com/bb57dbb8-ba58-486b-9ba8-1cafe8512d81.jpg"] },
+  { id: 5, name: "Brand Sirt 𝗦 Size", price: 195, desc: "Men Regular Fit Self Design Casual Shirt", images: ["https://i.supaimg.com/26948ee9-9856-4f23-a34c-cfb09c8bfe04.jpg"] },
+  { id: 6, name: "Brand Sirt 𝗠 Size", price: 158, desc: "Men Regular Fit Self Design Casual Shirt", images: ["https://i.supaimg.com/18b20dab-419a-4f14-9cbb-d21a8f46fac8.jpg"] },
+  { id: 7, name: "Brand Sirt 𝗦 Size", price: 127, desc: "Men Regular Fit Self Design Casual Shirt", images: ["https://i.supaimg.com/19fdcfe6-0300-4575-94b0-b592389cfc33.jpg"] },
+  { id: 8, name: "Brand Sirt 𝗠 Size", price: 149, desc: "Men Regular Fit Self Design Casual Shirt", images: ["https://i.supaimg.com/f090b124-8abc-486f-9149-c093113f1ae1.jpg"] },
+  { id: 9, name: "Brand Sirt 𝗦 Size", price: 142, desc: "Men Regular Fit Self Design Casual Shirt", images: ["https://i.supaimg.com/9906ae37-6f32-4544-a9b9-e28516ca696c.jpg"] },
+  { id: 10, name: "Brand Sirt 𝗠 Size", price: 139, desc: "Men Regular Fit Self Design Casual Shirt", images: ["https://i.supaimg.com/f1e62d2a-1c6a-405a-a847-93511d6d0f23.jpg"] }
+];
+
+let cart = [];
+let currentProduct = null;
+
+function displayProducts() {
+  const list = document.getElementById("product-list");
+  list.innerHTML = '';
+  products.forEach(prod => {
+    list.innerHTML += `
+      <div class="product" onclick="showDetail(${prod.id})">
+        <img src="${prod.images[0]}" />
+        <h3>${prod.name}</h3>
+        <p>₹${prod.price}</p>
+      </div>
+    `;
+  });
+}
+
+function showDetail(id) {
+  const prod = products.find(p => p.id === id);
+  currentProduct = prod;
+  document.getElementById("detail-title").innerText = prod.name;
+  document.getElementById("main-img").src = prod.images[0];
+  document.getElementById("detail-price").innerText = "₹" + prod.price;
+  document.getElementById("detail-desc").innerText = prod.desc;
+  document.getElementById("product-list").classList.add("hidden");
+  document.getElementById("detail-page").classList.remove("hidden");
+}
+
+function goHome() {
+  document.getElementById("product-list").classList.remove("hidden");
+  document.getElementById("detail-page").classList.add("hidden");
+  document.getElementById("cart-popup").classList.add("hidden");
+  document.getElementById("address-form").classList.add("hidden");
+}
+
+function addCurrentToCart() {
+  if (currentProduct) {
+    cart.push(currentProduct);
+    document.getElementById("cart-count").innerText = cart.length;
+    alert("Added to cart!");
+  }
+}
+
+function showCart() {
+  let html = '';
+  if (cart.length === 0) {
+    html = "<li>No items in cart</li>";
+  } else {
+    cart.forEach((item, i) => {
+      html += `<li>${item.name} - ₹${item.price}
+      <button class="remove" onclick="removeFromCart(${i})">Remove</button>
+      </li>`;
+    });
+  }
+  document.getElementById("cart-items").innerHTML = html;
+  document.getElementById("cart-popup").classList.remove("hidden");
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  document.getElementById("cart-count").innerText = cart.length;
+  showCart();
+}
+
+function buyNow() {
+  document.getElementById("cart-popup").classList.add("hidden");
+  document.getElementById("address-form").classList.remove("hidden");
+}
+
+function submitAddress() {
+  const name = document.getElementById("cust-name").value;
+  const phone = document.getElementById("cust-phone").value;
+  const address = document.getElementById("cust-address").value;
+  const pin = document.getElementById("cust-pin").value;
+
+  if (!name || !phone || !address || !pin) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  document.getElementById("cust-name").style.display = "none";
+  document.getElementById("cust-phone").style.display = "none";
+  document.getElementById("cust-address").style.display = "none";
+  document.getElementById("cust-pin").style.display = "none";
+  document.querySelectorAll("#address-form button")[0].style.display = "none";
+  document.querySelectorAll("#address-form button")[1].style.display = "none";
+  document.getElementById("form-title").innerText = "Scan & Pay";
+  document.getElementById("qr-section").classList.remove("hidden");
+}
+
+function confirmPayment() {
+  const utr = document.getElementById("utr-number").value.trim();
+  if (!utr) {
+    alert("Please enter UTR/Transaction ID.");
+    return;
+  }
+
+  alert("✅ Payment Confirmed!\nYour order has been placed.");
+  document.getElementById("address-form").classList.add("hidden");
+  cart = [];
+  document.getElementById("cart-count").innerText = "0";
+}
+displayProducts();
+</script>
+
+</body>
+</html>
